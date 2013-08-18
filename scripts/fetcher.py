@@ -40,6 +40,7 @@ def _facebook_description_element(tag):
      
  
 def _get_count(content):
+    "Assuming the first integer literal corresponds to counter looked for"
     for word in content.encode("ASCII", 'ignore').split():
         word = word.replace(",", "").replace(".", "")
         if word.isdigit():
@@ -48,7 +49,6 @@ def _get_count(content):
     
 
 def _facebook_extract(html_string):
-    "We assume the first integer literal corresponds to number of likes"
     result = dict(description=None, count=None)
     soup = BeautifulSoup(html_string)    
     elem = soup.find(_facebook_like_element)
