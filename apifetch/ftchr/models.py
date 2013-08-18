@@ -5,3 +5,6 @@ class ProfileModel(models.Model):
     username = models.CharField(max_length=128)
     count = models.IntegerField()
     description = models.CharField(max_length=1024 * 1024)
+
+    def __unicode__(self):
+        return "(network={0}, username={1})".format(self.network, self.username)
