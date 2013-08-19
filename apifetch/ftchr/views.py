@@ -1,3 +1,5 @@
+import json
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 from rest_framework.views import APIView
@@ -8,7 +10,7 @@ from rest_framework import status
 
 from ftchr.models import ProfileModel
 
-from fetcher import facebook, twitter
+from scripts.fetcher import facebook, twitter
 
 _facebook, _twitter = settings.NETWORKS.split("|")
 getter = {_facebook: facebook, _twitter: twitter}
@@ -16,6 +18,7 @@ getter = {_facebook: facebook, _twitter: twitter}
 class Profile(APIView):
 
     renderer_classes = [JSONRenderer,]
+    parser_classes = [JSONParser,]
     
     def get(self, request, network, username):
         try:
@@ -37,6 +40,7 @@ class Profile(APIView):
 
     def delete(self, request, network, username):
         try:
+            ProfileModel.objects.get(network=network, username=username)
             ProfileModel.objects.filter(
                 network=network, username=username).delete()
             return Response(dict(INFO="Deleted"))
@@ -44,14 +48,12 @@ class Profile(APIView):
             return Response(dict(ERROR="Not Found"), status=status.HTTP_404_NOT_FOUND)
 
     def put(self, request, network, username):
-        # just json request
-        request.accepted_media_type = 'application/json'
         try:
             profile = ProfileModel.objects.get(
                 network=network, username=username)
         except ObjectDoesNotExist:
             return Response(dict(ERROR="Not Found"), status=status.HTTP_404_NOT_FOUND)
-        data = request.DATA
+        data = json.loads(request.stream.read())
         to_save = False
         if "count" in data:
             profile.count = data['count']
@@ -68,12 +70,12 @@ class Profile(APIView):
 class ProfileMaker(APIView):
 
     renderer_classes = [JSONRenderer,]
+    parser_classes = [JSONParser,]
 
 
     def post(self, request, network):
         # just json request
-        request.accepted_media_type = 'application/json'
-        data = request.DATA
+        data = json.loads(request.stream.read())
         if "user" in data:
             if len(ProfileModel.objects.filter(username=data['user'],
                                                network=network)) > 0:

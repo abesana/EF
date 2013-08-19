@@ -6,5 +6,8 @@ class ProfileModel(models.Model):
     count = models.IntegerField()
     description = models.CharField(max_length=1024 * 1024)
 
+    class Meta:
+        unique_together = ('network', 'username')
+
     def __unicode__(self):
         return "(network={0}, username={1})".format(self.network, self.username)
