@@ -1,5 +1,5 @@
 import os
-from scripts import fetcher
+from .. import fetcher
 
 from nose.tools import eq_
 

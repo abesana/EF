@@ -81,9 +81,11 @@ class ProfileMaker(APIView):
                                                network=network)) > 0:
                 return Response(dict(ERROR="Username already exist"),
                                      status=status.HTTP_409_CONFLICT)
-            profile = ProfileModel()
-            profile.count = data.get('count', 0)
-            profile.description = data.get('description', '')
+            profile = ProfileModel(
+                username=data['user'],
+                network=network,
+                count=data.get('count', 0),
+                description=data.get('description', ''))
             profile.save()
             return Response(dict(INFO="Created"), status=status.HTTP_201_CREATED)
         else:
